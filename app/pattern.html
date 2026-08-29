@@ -1,0 +1,435 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creatiwise — Your Design Partners</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          hand: ['Caveat', 'cursive'],
+        },
+        colors: {
+          ink: '#141414',
+          paper: '#EFEFEC',
+          card: '#F4F4F1',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .doodle-rotate { transform: rotate(-4deg); }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .marquee-track {
+    animation: marquee 22s linear infinite;
+  }
+  .marquee-outline {
+    -webkit-text-stroke: 1.5px #d4d4d4;
+    color: transparent;
+  }
+  @supports not (-webkit-text-stroke: 1px black) {
+    .marquee-outline { color: #ececec; -webkit-text-stroke: 0; }
+  }
+</style>
+</head>
+<body class="bg-white text-ink font-body antialiased">
+
+<!-- NAV -->
+<header class="max-w-7xl mx-auto px-6 md:px-10 pt-8 flex items-center justify-between">
+  <div class="font-display text-xl font-semibold tracking-tight">creatiwise.</div>
+  <nav class="hidden md:flex items-center gap-8 text-sm text-neutral-600">
+    <a href="#" class="hover:text-ink">About us</a>
+    <a href="#" class="hover:text-ink">How we work</a>
+    <a href="#" class="hover:text-ink">What we do</a>
+    <a href="#" class="hover:text-ink">Portfolio</a>
+  </nav>
+  <a href="#" class="hidden md:inline-flex items-center gap-2 bg-ink text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-neutral-800 transition">
+    Let's talk
+  </a>
+</header>
+
+<!-- ABOUT US -->
+<section class="bg-paper mt-8">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="inline-block text-xs font-medium border border-neutral-400/60 rounded-full px-4 py-1.5 mb-6 text-neutral-600">About us</span>
+        <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight leading-[1.1] mb-5">
+          Meet Creatiwise: Your Design Partners
+        </h1>
+        <p class="text-neutral-600 leading-relaxed max-w-md">
+          We're not just designers; we're creators, problem-solvers, and your brand's best friends. At Creatiwise, we live and breathe design, from captivating visuals to seamless digital experiences. Think of us as an extension of your team, ready to bring your ideas to life.
+        </p>
+      </div>
+      <div class="relative">
+        <svg class="absolute -top-6 right-16 w-10 h-10 text-ink hidden md:block" viewBox="0 0 40 40" fill="none">
+          <path d="M20 2v10M20 28v10M2 20h10M28 20h10M8 8l7 7M25 25l7 7M32 8l-7 7M15 25l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <img src="https://picsum.photos/seed/creatiwise-team1/700/460" alt="Team huddled together" class="w-full h-64 md:h-72 object-cover rounded-2xl grayscale">
+      </div>
+    </div>
+
+    <!-- stats + pills + image row -->
+    <div class="mt-8 flex flex-col md:flex-row gap-4">
+      <div class="relative flex-[1.3] bg-ink rounded-2xl overflow-hidden px-8 py-8 min-h-[230px] flex flex-col justify-between">
+        <svg class="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 600 300" fill="none" preserveAspectRatio="none">
+          <g stroke="white" stroke-width="1">
+            <circle cx="480" cy="150" r="60" opacity="0.5"/>
+            <circle cx="480" cy="150" r="100" opacity="0.4"/>
+            <circle cx="480" cy="150" r="140" opacity="0.3"/>
+            <circle cx="480" cy="150" r="180" opacity="0.2"/>
+            <circle cx="480" cy="150" r="220" opacity="0.15"/>
+          </g>
+        </svg>
+        <div class="relative z-10">
+          <p class="text-white font-display text-4xl md:text-5xl font-bold">40%</p>
+          <p class="text-neutral-300 text-sm mt-1">Increased growth revenues</p>
+        </div>
+        <div class="relative z-10 flex flex-wrap gap-2 mt-6">
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[-3deg] shadow-sm">Marketing</span>
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[2deg] shadow-sm">Web Design</span>
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[-2deg] shadow-sm">Web Design</span>
+          <br class="w-full">
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[3deg] shadow-sm">Product Design</span>
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[-4deg] shadow-sm">SEO</span>
+          <span class="bg-white text-ink text-xs font-medium px-4 py-2 rounded-full rotate-[2deg] shadow-sm">Brand Positioning</span>
+        </div>
+      </div>
+      <img src="https://picsum.photos/seed/creatiwise-team2/500/400" alt="Team working together" class="flex-1 w-full h-[230px] object-cover rounded-2xl grayscale">
+    </div>
+  </div>
+</section>
+
+<!-- HOW WE WORK -->
+<section class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
+    <div class="max-w-lg mb-4">
+      <span class="inline-block text-xs font-medium border border-neutral-300 rounded-full px-4 py-1.5 mb-6 text-neutral-600">How we work</span>
+      <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-5">
+        Let us show you how we drive your brand to new heights
+      </h2>
+      <p class="text-neutral-500 text-sm leading-relaxed">
+        Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac ali
+      </p>
+    </div>
+
+    <!-- process cards -->
+    <div class="relative mt-16 mx-auto md:mx-0 md:ml-8 md:w-[640px] md:h-[880px] h-auto">
+
+      <!-- marquee watermark band, behind the cards -->
+      <div class="hidden md:block absolute top-[360px] left-1/2 -translate-x-1/2 w-[1400px] -z-10 rotate-[-3deg] overflow-hidden pointer-events-none select-none">
+        <div class="flex w-max marquee-track">
+          <div class="flex items-center shrink-0">
+            <span class="font-display marquee-outline font-bold text-[110px] leading-none whitespace-nowrap pr-8">DEFINE &nbsp;•&nbsp; DESIGN &nbsp;•&nbsp; BUILD &nbsp;•&nbsp; LAUNCH &nbsp;•&nbsp;</span>
+            <span class="font-display marquee-outline font-bold text-[110px] leading-none whitespace-nowrap pr-8">DEFINE &nbsp;•&nbsp; DESIGN &nbsp;•&nbsp; BUILD &nbsp;•&nbsp; LAUNCH &nbsp;•&nbsp;</span>
+          </div>
+          <div class="flex items-center shrink-0" aria-hidden="true">
+            <span class="font-display marquee-outline font-bold text-[110px] leading-none whitespace-nowrap pr-8">DEFINE &nbsp;•&nbsp; DESIGN &nbsp;•&nbsp; BUILD &nbsp;•&nbsp; LAUNCH &nbsp;•&nbsp;</span>
+            <span class="font-display marquee-outline font-bold text-[110px] leading-none whitespace-nowrap pr-8">DEFINE &nbsp;•&nbsp; DESIGN &nbsp;•&nbsp; BUILD &nbsp;•&nbsp; LAUNCH &nbsp;•&nbsp;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- dashed connector (desktop only) — endpoints match each card's punched-hole grommet -->
+      <svg class="hidden md:block absolute inset-0 w-full h-full -z-0" viewBox="0 0 640 880" fill="none" preserveAspectRatio="none">
+        <path d="M490 66 C 400 105, 220 135, 140 216" stroke="#141414" stroke-width="1.3" stroke-dasharray="5 6" fill="none"/>
+        <path d="M140 216 C 200 285, 420 385, 490 486" stroke="#141414" stroke-width="1.3" stroke-dasharray="5 6" fill="none"/>
+        <path d="M490 486 C 420 525, 220 565, 140 646" stroke="#141414" stroke-width="1.3" stroke-dasharray="5 6" fill="none"/>
+        <path d="M140 646 C 190 725, 320 785, 420 850" stroke="#141414" stroke-width="1.3" stroke-dasharray="5 6" fill="none"/>
+      </svg>
+
+      <!-- 01 Define -->
+      <div class="relative md:absolute md:top-[40px] md:right-[10px] w-full md:w-[280px] mb-10 md:mb-0 rotate-0 md:rotate-[4deg] z-10">
+        <div class="hidden md:block absolute -inset-2 translate-x-2 translate-y-2 bg-white border border-neutral-200 rounded-[22px] -z-10 shadow-[0_35px_60px_-25px_rgba(0,0,0,0.35)]"></div>
+        <div class="relative bg-card border border-neutral-300/70 rounded-2xl shadow-[0_18px_35px_-15px_rgba(0,0,0,0.18)] pt-14 px-7 pb-8">
+          <span class="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-white ring-1 ring-neutral-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.18)] items-center justify-center">
+            <span class="w-3 h-3 rounded-full" style="background: radial-gradient(circle at 35% 30%, #9a9a9a, #1c1c1c 65%);"></span>
+          </span>
+          <p class="font-display text-xs text-neutral-500 mb-3">01</p>
+          <h3 class="font-display text-xl font-bold mb-2">Define</h3>
+          <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos</p>
+        </div>
+      </div>
+
+      <!-- 02 Design -->
+      <div class="relative md:absolute md:top-[190px] md:left-0 w-full md:w-[280px] mb-10 md:mb-0 rotate-0 md:rotate-[-6deg] z-20">
+        <div class="hidden md:block absolute -inset-2 translate-x-2 translate-y-2 bg-white border border-neutral-200 rounded-[22px] -z-10 shadow-[0_35px_60px_-25px_rgba(0,0,0,0.35)]"></div>
+        <div class="relative bg-card border border-neutral-300/70 rounded-2xl shadow-[0_18px_35px_-15px_rgba(0,0,0,0.18)] pt-14 px-7 pb-8">
+          <span class="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-white ring-1 ring-neutral-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.18)] items-center justify-center">
+            <span class="w-3 h-3 rounded-full" style="background: radial-gradient(circle at 35% 30%, #9a9a9a, #1c1c1c 65%);"></span>
+          </span>
+          <p class="font-display text-xs text-neutral-500 mb-3">02</p>
+          <h3 class="font-display text-xl font-bold mb-2">Design</h3>
+          <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos</p>
+        </div>
+      </div>
+
+      <!-- 03 Build -->
+      <div class="relative md:absolute md:top-[460px] md:right-[10px] w-full md:w-[280px] mb-10 md:mb-0 rotate-0 md:rotate-[3deg] z-10">
+        <div class="hidden md:block absolute -inset-2 translate-x-2 translate-y-2 bg-white border border-neutral-200 rounded-[22px] -z-10 shadow-[0_35px_60px_-25px_rgba(0,0,0,0.35)]"></div>
+        <div class="relative bg-card border border-neutral-300/70 rounded-2xl shadow-[0_18px_35px_-15px_rgba(0,0,0,0.18)] pt-14 px-7 pb-8">
+          <span class="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-white ring-1 ring-neutral-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.18)] items-center justify-center">
+            <span class="w-3 h-3 rounded-full" style="background: radial-gradient(circle at 35% 30%, #9a9a9a, #1c1c1c 65%);"></span>
+          </span>
+          <p class="font-display text-xs text-neutral-500 mb-3">03</p>
+          <h3 class="font-display text-xl font-bold mb-2">Build</h3>
+          <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos</p>
+        </div>
+      </div>
+
+      <!-- 04 Launch -->
+      <div class="relative md:absolute md:top-[620px] md:left-0 w-full md:w-[280px] mb-2 md:mb-0 rotate-0 md:rotate-[-5deg] z-20">
+        <div class="hidden md:block absolute -inset-2 translate-x-2 translate-y-2 bg-white border border-neutral-200 rounded-[22px] -z-10 shadow-[0_35px_60px_-25px_rgba(0,0,0,0.35)]"></div>
+        <div class="relative bg-card border border-neutral-300/70 rounded-2xl shadow-[0_18px_35px_-15px_rgba(0,0,0,0.18)] pt-14 px-7 pb-8 w-full md:w-[280px]">
+          <span class="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-white ring-1 ring-neutral-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.18)] items-center justify-center">
+            <span class="w-3 h-3 rounded-full" style="background: radial-gradient(circle at 35% 30%, #9a9a9a, #1c1c1c 65%);"></span>
+          </span>
+          <p class="font-display text-xs text-neutral-500 mb-3">04</p>
+          <h3 class="font-display text-xl font-bold mb-2">Launch</h3>
+          <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos</p>
+        </div>
+        <p class="font-hand text-2xl mt-4 md:mt-2 md:absolute md:top-[210px] md:left-[190px] rotate-[-3deg] whitespace-nowrap">Ready to be delivered!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE DO -->
+<section class="bg-ink text-white">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
+    <div class="grid md:grid-cols-2 gap-6 items-start mb-12">
+      <div>
+        <span class="inline-block text-xs font-medium border border-neutral-600 rounded-full px-4 py-1.5 mb-6 text-neutral-300">What we do</span>
+        <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight leading-tight">
+          We design meaningful not just quick impressions
+        </h2>
+      </div>
+      <p class="text-neutral-400 text-sm leading-relaxed md:pt-16">
+        Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac ali
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- card -->
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l16 16M20 4L4 20"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">Brand Identity</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v16"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">Illustration</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">UI/UX Design</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">Frontend Design</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">Android/iOS App</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+        <div class="w-9 h-9 rounded-md border border-neutral-700 flex items-center justify-center mb-6">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l-6 8 6 8M16 4l6 8-6 8"/></svg>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-2">Software Development</h3>
+        <p class="text-neutral-500 text-sm leading-relaxed">Qorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliqu</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <p class="text-neutral-500 text-sm leading-relaxed max-w-[220px] order-2 md:order-1">
+        Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac ali
+      </p>
+      <div class="order-1 md:order-2 md:text-right">
+        <span class="inline-block text-xs font-medium border border-neutral-300 rounded-full px-4 py-1.5 mb-6 text-neutral-600">Portfolio</span>
+        <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight leading-tight">
+          Explore our most successful projects
+        </h2>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div>
+        <div class="relative rounded-2xl overflow-hidden mb-4">
+          <img src="https://picsum.photos/seed/creatiwise-map/500/380" class="w-full h-56 object-cover">
+          <span class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </span>
+        </div>
+        <p class="text-xs text-neutral-400 mb-1">App product</p>
+        <h3 class="font-display font-semibold">Wayfind — Navigation App</h3>
+      </div>
+      <div>
+        <div class="relative rounded-2xl overflow-hidden mb-4">
+          <img src="https://picsum.photos/seed/creatiwise-music1/500/380" class="w-full h-56 object-cover">
+          <span class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </span>
+        </div>
+        <p class="text-xs text-neutral-400 mb-1">AI Music product</p>
+        <h3 class="font-display font-semibold">UX Case study</h3>
+      </div>
+      <div>
+        <div class="relative rounded-2xl overflow-hidden mb-4">
+          <img src="https://picsum.photos/seed/creatiwise-music2/500/380" class="w-full h-56 object-cover">
+          <span class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </span>
+        </div>
+        <p class="text-xs text-neutral-400 mb-1">AI Music product</p>
+        <h3 class="font-display font-semibold">UX Case study</h3>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a href="#" class="inline-flex items-center gap-2 bg-ink text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-neutral-800 transition">
+        See all projects
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="bg-paper">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
+    <div class="grid md:grid-cols-2 gap-10">
+      <div>
+        <span class="inline-block text-xs font-medium border border-neutral-400/60 rounded-full px-4 py-1.5 mb-6 text-neutral-600">Reviews</span>
+        <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-5">
+          Here's what people say about our work
+        </h2>
+        <p class="text-neutral-500 text-sm leading-relaxed max-w-sm">
+          Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac ali
+        </p>
+      </div>
+      <div>
+        <div class="flex items-start gap-5">
+          <img src="https://picsum.photos/seed/creatiwise-john/120/120" class="w-16 h-16 rounded-full object-cover grayscale flex-shrink-0">
+          <div>
+            <svg class="w-8 h-8 text-neutral-400 mb-3" viewBox="0 0 24 24" fill="currentColor"><path d="M7 8c-2.2 0-4 1.8-4 4v6h6v-6H6c0-1.1.9-2 2-2V8zm10 0c-2.2 0-4 1.8-4 4v6h6v-6h-3c0-1.1.9-2 2-2V8z"/></svg>
+            <p class="text-neutral-600 leading-relaxed mb-5">
+              Yorem ipsum dolor sit amet, adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur tempus urna at turpis condimentum lobortis.
+            </p>
+            <p class="font-display font-semibold text-sm">John D.</p>
+            <p class="text-neutral-400 text-xs">Marketing Manager</p>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-8 ml-[84px]">
+          <span class="w-2 h-2 rounded-full bg-ink"></span>
+          <span class="w-2 h-2 rounded-full bg-neutral-300"></span>
+          <span class="w-2 h-2 rounded-full bg-neutral-300"></span>
+          <span class="w-2 h-2 rounded-full bg-neutral-300"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-white px-6 md:px-10">
+  <div class="max-w-6xl mx-auto pb-10">
+    <div class="relative bg-ink rounded-3xl px-8 py-16 md:py-20 text-center overflow-hidden">
+      <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 800 300" fill="none" preserveAspectRatio="none">
+        <g stroke="white" stroke-width="1">
+          <circle cx="400" cy="150" r="80" opacity="0.4"/>
+          <circle cx="400" cy="150" r="130" opacity="0.3"/>
+          <circle cx="400" cy="150" r="180" opacity="0.2"/>
+        </g>
+      </svg>
+      <div class="relative z-10">
+        <h2 class="font-display text-2xl md:text-3xl font-bold text-white mb-3">Let's start designing your project</h2>
+        <p class="text-neutral-400 text-sm mb-8">Want to see how to transform your brand into a unique style?<br>Send us a message!</p>
+        <a href="#" class="inline-flex items-center gap-2 bg-white text-ink text-sm font-medium px-6 py-3 rounded-full hover:bg-neutral-200 transition">
+          Send us a message
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19L19 5M9 5h10v10"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-neutral-200">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 py-14">
+    <div class="grid md:grid-cols-4 gap-10">
+      <div>
+        <p class="font-display text-lg font-semibold mb-4">creatiwise.</p>
+        <p class="text-neutral-500 text-sm leading-relaxed max-w-[220px]">
+          Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac ali
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-neutral-400 mb-4">Navigate</p>
+        <ul class="space-y-3 text-sm text-neutral-600">
+          <li><a href="#" class="hover:text-ink">Home</a></li>
+          <li><a href="#" class="hover:text-ink">About Us</a></li>
+          <li><a href="#" class="hover:text-ink">How we work</a></li>
+          <li><a href="#" class="hover:text-ink">What we do</a></li>
+          <li><a href="#" class="hover:text-ink">Portfolio</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-neutral-400 mb-4">Support</p>
+        <ul class="space-y-3 text-sm text-neutral-600">
+          <li><a href="#" class="hover:text-ink">FAQ</a></li>
+          <li><a href="#" class="hover:text-ink">Articles</a></li>
+          <li><a href="#" class="hover:text-ink">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-neutral-400 mb-4">Social Media</p>
+        <ul class="space-y-3 text-sm text-neutral-600">
+          <li><a href="#" class="hover:text-ink">Dribbble</a></li>
+          <li><a href="#" class="hover:text-ink">Behance</a></li>
+          <li><a href="#" class="hover:text-ink">LinkedIn</a></li>
+          <li><a href="#" class="hover:text-ink">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-14 pt-6 border-t border-neutral-200 text-xs text-neutral-400">
+      <p>© 2026 Creatiwise</p>
+      <p>All Rights Reserved</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

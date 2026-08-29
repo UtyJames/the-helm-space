@@ -1,26 +1,160 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── Averta PE Font Faces ─────────────────────────────────────────────────── */
+/*
+ * unicode-range limits AvertaPE to characters the trial font actually covers.
+ * Unsupported glyphs (₦, —, →, etc.) fall back to Arial instead of showing as 'o'.
+ */
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Regular.Trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — before % (0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; … ~  — skips : (003A) */
+    U+00A0-00B6,        /* nbsp … ¶  — stops before · (00B7) */
+    U+00B8-00FF,        /* ¸ … ÿ  — skips · (00B7) */
+    U+0100-017F, U+0180-024F,
+    U+2000-2012,        /* general punctuation  — stops before – (2013) */
+    U+2015-206F,        /* skips – (2013) and — (2014) */
+    U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Italic.Trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — before % (0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; … ~  — skips : (003A) */
+    U+00A0-00B6,        /* nbsp … ¶  — stops before · (00B7) */
+    U+00B8-00FF,        /* ¸ … ÿ  — skips · (00B7) */
+    U+0100-017F, U+0180-024F,
+    U+2000-2012,        /* general punctuation  — stops before – (2013) */
+    U+2015-206F,        /* skips – (2013) and — (2014) */
+    U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Semibold.Trial.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — before % (0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; … ~  — skips : (003A) */
+    U+00A0-00B6,        /* nbsp … ¶  — stops before · (00B7) */
+    U+00B8-00FF,        /* ¸ … ÿ  — skips · (00B7) */
+    U+0100-017F, U+0180-024F,
+    U+2000-2012,        /* general punctuation  — stops before – (2013) */
+    U+2015-206F,        /* skips – (2013) and — (2014) */
+    U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Bold.Trial.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — before % (0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; … ~  — skips : (003A) */
+    U+00A0-00B6,        /* nbsp … ¶  — stops before · (00B7) */
+    U+00B8-00FF,        /* ¸ … ÿ  — skips · (00B7) */
+    U+0100-017F, U+0180-024F,
+    U+2000-2012,        /* general punctuation  — stops before – (2013) */
+    U+2015-206F,        /* skips – (2013) and — (2014) */
+    U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Light.Trial.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — before % (0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; … ~  — skips : (003A) */
+    U+00A0-00B6,        /* nbsp … ¶  — stops before · (00B7) */
+    U+00B8-00FF,        /* ¸ … ÿ  — skips · (00B7) */
+    U+0100-017F, U+0180-024F,
+    U+2000-2012,        /* general punctuation  — stops before – (2013) */
+    U+2015-206F,        /* skips – (2013) and — (2014) */
+    U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+@font-face {
+  font-family: "AvertaPE";
+  src: url("/averta-pe-font-family/AvertaPE-Black.Trial.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-0024,        /* space ! " # $  — stops before % (U+0025) */
+    U+0027-0039,        /* ' ( ) * + , - . / 0-9  — skips % (0025) & & (0026) */
+    U+003B-007E,        /* ; < = > ? @ A-Z … ~  — skips : (003A) */
+    U+00A0-00FF, U+0100-017F, U+0180-024F,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Tailwind v4 Theme ────────────────────────────────────────────────────── */
+@theme {
+  --font-averta:    "Inter", Arial, Helvetica, sans-serif;
+  --font-fraunces:  "Space Grotesk", sans-serif;
+  --font-mono:      "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  
+  --font-display:   "Space Grotesk", sans-serif;
+  --font-body:      "Inter", sans-serif;
+  --font-hand:      "Caveat", cursive;
+
+  --color-ink:          #141414;
+  --color-paper:        #EFEFEC;
+  --color-card:         #F4F4F1;
+  --color-brand:        #141414;
+  --color-brand-dark:   #000000;
+  --color-primary:      #f1552b;
+  --color-secondary:    #2C2C2A;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Keyframes ────────────────────────────────────────────────────────────── */
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-averta);
+  font-size: 13px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-fraunces);
+  font-optical-sizing: auto;
+}
+
+/* ─── Marquee Animations ───────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 22s linear infinite;
+}
+.marquee-outline {
+  -webkit-text-stroke: 1.5px #d4d4d4;
+  color: transparent;
+}
+@supports not (-webkit-text-stroke: 1px black) {
+  .marquee-outline { color: #ececec; -webkit-text-stroke: 0; }
 }
