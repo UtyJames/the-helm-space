@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -56,7 +56,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 md:px-10 pt-8 pb-4 flex items-center justify-between relative">
         {/* Logo */}
         <a href="/" aria-label="Go to homepage" className="flex items-center">
-          <img src="/THS-LOGO.svg" alt="Space logo" className="block h-8 w-auto md:h-10" />
+          <img src="/THS-LOGO.svg" alt="The Helm Space logo" className="block h-8 w-auto md:h-10" />
         </a>
 
         {/* Desktop Nav Links */}

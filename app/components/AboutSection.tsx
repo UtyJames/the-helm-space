@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef } from "react";
 
@@ -44,10 +44,10 @@ export default function AboutSection() {
               About us
             </span>
             <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight leading-[1.1] mb-5 text-ink">
-              Meet The Helm: Your Productivity Partners
+              Meet The Helm Space: Your Productivity Partners
             </h1>
             <p className="text-neutral-600 font-body leading-relaxed max-w-md text-sm">
-              We're not just a workspace; we're creators, problem-solvers, and your routine's best friends. At The Helm, we live and breathe focus, from reliable power to seamless workspace experiences. Think of us as an extension of your routine, ready to bring your ideas to life.
+              We're not just a workspace; we're creators, problem-solvers, and your routine's best friends. At The Helm Space, we live and breathe focus, from reliable power to seamless workspace experiences. Think of us as an extension of your routine, ready to bring your ideas to life.
             </p>
           </div>
           <div className="relative">
@@ -67,7 +67,7 @@ export default function AboutSection() {
             </svg>
             <img
               src="/hero_img2.webp"
-              alt="The Helm team and community"
+              alt="The Helm Space team and community"
               className="w-full h-64 md:h-72 object-cover rounded-2xl grayscale"
             />
           </div>
@@ -134,7 +134,7 @@ export default function AboutSection() {
           {/* Grayscale secondary image */}
           <img
             src="/hero_img.jpg.webp"
-            alt="Coworkers collaborating at The Helm"
+            alt="Coworkers collaborating at The Helm Space"
             className="flex-1 w-full h-[250px] object-cover rounded-2xl grayscale"
           />
         </div>

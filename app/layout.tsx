@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         url: "/hero_img.jpg.webp",
         width: 1200,
         height: 630,
-        alt: "The Helm premium workspace environment",
+        alt: "The Helm Space premium workspace environment",
       },
     ],
     locale: "en_US",

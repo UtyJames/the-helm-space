@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export default function TestimonialsSection() {
   return (
@@ -10,7 +10,7 @@ export default function TestimonialsSection() {
               Reviews
             </span>
             <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-5 text-ink">
-              Here's what our members say about The Helm
+              Here's what our members say about The Helm Space
             </h2>
             <p className="text-neutral-500 text-sm leading-relaxed max-w-sm font-body">
               From freelancers to distributed engineering teams. Read how having a reliable space has helped our members do their best work.
@@ -28,7 +28,7 @@ export default function TestimonialsSection() {
                   <path d="M7 8c-2.2 0-4 1.8-4 4v6h6v-6H6c0-1.1.9-2 2-2V8zm10 0c-2.2 0-4 1.8-4 4v6h6v-6h-3c0-1.1.9-2 2-2V8z" />
                 </svg>
                 <p className="text-neutral-600 leading-relaxed mb-5 font-body text-sm">
-                  "The Helm completely changed my workday routine. I used to spend hours dealing with power outages and unstable fiber lines at home. Here, everything is always on, silent, and incredibly fast. The community is focused, and the quiet spaces are exactly what I need for deep work."
+                  "The Helm Space completely changed my workday routine. I used to spend hours dealing with power outages and unstable fiber lines at home. Here, everything is always on, silent, and incredibly fast. The community is focused, and the quiet spaces are exactly what I need for deep work."
                 </p>
                 <p className="font-display font-semibold text-sm text-ink">John D.</p>
                 <p className="text-neutral-400 text-xs font-body">Independent Software Engineer</p>

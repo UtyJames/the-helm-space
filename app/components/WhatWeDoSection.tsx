@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 const SERVICES = [
   {
@@ -76,7 +76,7 @@ export default function WhatWeDoSection() {
             </h2>
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed md:pt-16 max-w-md">
-            The Helm workspace options are designed to provide absolute focus, quiet collaboration, and premium business support. No distractions, just results.
+            The Helm Space workspace options are designed to provide absolute focus, quiet collaboration, and premium business support. No distractions, just results.
           </p>
         </div>
 
