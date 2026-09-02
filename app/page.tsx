@@ -85,7 +85,7 @@ export default function Home() {
 
               {/* Footer row */}
               <div className="flex items-center justify-between gap-4">
-                <div className="text-[12px] text-neutral-500 font-medium">Today &middot; 9:00 AM &ndash; 1:00 PM</div>
+                <div className="text-[12px] text-neutral-500 font-medium">Today &middot; 8:00 AM &ndash; 5:30 PM</div>
                 <a
                   href="/book"
                   className="inline-flex items-center text-[12px] font-semibold text-white px-5 py-2.5 rounded-full no-underline transition-colors hover:bg-neutral-800 whitespace-nowrap"
