@@ -33,7 +33,7 @@ export default function CTASection() {
               href="/contact"
               className="inline-flex items-center gap-2 bg-white text-ink text-sm font-medium px-6 py-3 rounded-full hover:bg-neutral-200 transition no-underline"
             >
-              Book a Tour
+              Find us on Google Maps
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 19L19 5M9 5h10v10" />
               </svg>

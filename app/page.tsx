@@ -3,6 +3,7 @@ import HowWeWorkSection    from "./components/HowWeWorkSection";
 import WhatWeDoSection     from "./components/WhatWeDoSection";
 import PortfolioSection    from "./components/PortfolioSection";
 import TestimonialsSection from "./components/TestimonialsSection";
+import BlogSection         from "./components/BlogSection";
 import CTASection          from "./components/CTASection";
 import Footer              from "./components/Footer";
 
@@ -63,22 +64,22 @@ export default function Home() {
                   style={{ background: "#141414" }}
                 >
                   <div className="text-[13px] font-medium text-white mb-1 leading-tight">Single desk</div>
-                  <div className="text-[11px] font-mono" style={{ color: "#f1552b" }}>&#8358;2,500/day</div>
+                  <div className="text-[11px] font-mono" style={{ color: "#f1552b" }}>&#8358;2,000/day</div>
                 </div>
 
                 <div className="bg-white border border-[#D8D2C4] rounded-[8px] p-3.5 text-center cursor-pointer hover:border-[#f1552b] transition-colors">
                   <div className="text-[13px] font-medium text-[#141414] mb-1 leading-tight">Shared table</div>
-                  <div className="text-[11px] font-mono text-[#5C7A73]">&#8358;1,800/day</div>
+                  <div className="text-[11px] font-mono text-[#5C7A73]">&#8358;1,500/day</div>
                 </div>
 
                 <div className="bg-white border border-[#D8D2C4] rounded-[8px] p-3.5 text-center cursor-pointer hover:border-[#f1552b] transition-colors">
                   <div className="text-[13px] font-medium text-[#141414] mb-1 leading-tight">Meeting room</div>
-                  <div className="text-[11px] font-mono text-[#5C7A73]">&#8358;9,000/hr</div>
+                  <div className="text-[11px] font-mono text-[#5C7A73]">&#8358;15,000/sess</div>
                 </div>
 
                 <div className="bg-white border border-[#D8D2C4] rounded-[8px] p-3.5 text-center cursor-pointer hover:border-[#f1552b] transition-colors">
                   <div className="text-[13px] font-medium text-[#141414] mb-1 leading-tight">Team booking</div>
-                  <div className="text-[11px] font-mono text-[#5C7A73]">Custom</div>
+                  <div className="text-[11px] font-mono text-[#5C7A73]">&#8358;11,000/mo</div>
                 </div>
               </div>
 
@@ -142,6 +143,7 @@ export default function Home() {
       <WhatWeDoSection />
       <PortfolioSection />
       <TestimonialsSection />
+      <BlogSection />
       <CTASection />
       <Footer />
     </>

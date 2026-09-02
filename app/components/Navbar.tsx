@@ -39,8 +39,11 @@ export default function Navbar() {
       {/* ── Announcement Bar (Full width) ────────────────────── */}
       {announcementVisible && (
         <div className="relative flex min-h-[40px] w-full items-center justify-center bg-ink px-6 py-2.5 text-center">
-          <p className="font-body text-xs font-medium text-white/90">
-            Get 10% off your first meeting room booking this month.
+          <p className="font-body text-xs font-medium text-white/90 flex items-center justify-center gap-2">
+            <span style={{ fontFamily: "'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif" }} aria-hidden="true">
+              🎉
+            </span>
+            <span>Get 10% off your first meeting room booking this month.</span>
           </p>
           <button
             onClick={() => setAnnouncementVisible(false)}
