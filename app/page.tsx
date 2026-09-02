@@ -1,4 +1,4 @@
-﻿import AboutSection        from "./components/AboutSection";
+import AboutSection        from "./components/AboutSection";
 import HowWeWorkSection    from "./components/HowWeWorkSection";
 import WhatWeDoSection     from "./components/WhatWeDoSection";
 import PortfolioSection    from "./components/PortfolioSection";
@@ -39,8 +39,14 @@ export default function Home() {
           </div>
 
           {/* Booking widget */}
-          <div className="mb-10">
-            <div className="bg-[#F5F1E8] rounded-[14px] border border-neutral-300/60 p-6 max-w-[680px]">
+          <div className="mb-10 relative max-w-[680px]">
+            {/* Decorative three.svg at top right */}
+            <img
+              src="/three.svg"
+              alt=""
+              className="absolute -top-8 -right-8 w-24 h-auto pointer-events-none z-10"
+            />
+            <div className="bg-[#F5F1E8] rounded-[14px] border border-neutral-300/60 p-6">
 
               {/* Label */}
               <div

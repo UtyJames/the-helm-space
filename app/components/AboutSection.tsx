@@ -35,7 +35,7 @@ export default function AboutSection() {
   }, []);
 
   return (
-    <section className="bg-card mt-8">
+    <section className="bg-card">
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
         {/* Top Grid */}
         <div className="grid md:grid-cols-2 gap-10 items-center">
