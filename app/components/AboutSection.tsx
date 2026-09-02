@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 export default function AboutSection() {
   const counterRef = useRef<HTMLParagraphElement>(null);
+  const pillsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -11,26 +12,55 @@ export default function AboutSection() {
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
-      if (!counterRef.current) return;
+      if (counterRef.current) {
+        const proxy = { val: 0 };
+        ScrollTrigger.create({
+          trigger: counterRef.current,
+          start: "top 85%",
+          once: true,
+          onEnter() {
+            gsap.to(proxy, {
+              val: 150,
+              duration: 2,
+              ease: "power2.out",
+              onUpdate() {
+                if (counterRef.current) {
+                  counterRef.current.textContent = `${Math.round(proxy.val)}+`;
+                }
+              },
+            });
+          },
+        });
+      }
 
-      const proxy = { val: 0 };
-      ScrollTrigger.create({
-        trigger: counterRef.current,
-        start: "top 85%",
-        once: true,
-        onEnter() {
-          gsap.to(proxy, {
-            val: 150,
-            duration: 2,
-            ease: "power2.out",
-            onUpdate() {
-              if (counterRef.current) {
-                counterRef.current.textContent = `${Math.round(proxy.val)}+`;
-              }
-            },
-          });
-        },
-      });
+      if (pillsRef.current) {
+        const pills = pillsRef.current.querySelectorAll<HTMLElement>(".pill-item");
+
+        gsap.set(pills, {
+          y: -220,
+          opacity: 0,
+          rotate: (i) => (i % 2 === 0 ? -12 : 12),
+        });
+
+        ScrollTrigger.create({
+          trigger: pillsRef.current,
+          start: "top 85%",
+          once: true,
+          onEnter() {
+            pills.forEach((pill, idx) => {
+              const targetRot = parseFloat(pill.dataset.rotation || "0");
+              gsap.to(pill, {
+                y: 0,
+                opacity: 1,
+                rotate: targetRot,
+                duration: 1.1,
+                delay: idx * 0.08,
+                ease: "bounce.out",
+              });
+            });
+          },
+        });
+      }
     })();
   }, []);
 
@@ -107,25 +137,43 @@ export default function AboutSection() {
               </p>
             </div>
 
-            {/* Rotated Pills */}
-            <div className="relative z-10 flex flex-wrap gap-2 mt-6">
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[-3deg] shadow-sm">
+            {/* Rotated Pills with GSAP Physics Bounce Drop */}
+            <div ref={pillsRef} className="relative z-10 flex flex-wrap gap-2 mt-6">
+              <span
+                data-rotation="-3"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 Backup Power
               </span>
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[2deg] shadow-sm">
+              <span
+                data-rotation="2"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 Quiet Rooms
               </span>
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[-2deg] shadow-sm">
+              <span
+                data-rotation="-2"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 Meeting Space
               </span>
               <br className="w-full hidden sm:block" />
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[3deg] shadow-sm">
+              <span
+                data-rotation="3"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 Fast Wifi
               </span>
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[-4deg] shadow-sm">
+              <span
+                data-rotation="-4"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 Team Desks
               </span>
-              <span className="bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full rotate-[2deg] shadow-sm">
+              <span
+                data-rotation="2"
+                className="pill-item bg-white text-ink text-xs font-body font-medium px-4 py-2 rounded-full shadow-sm"
+              >
                 The Kit Shop
               </span>
             </div>
