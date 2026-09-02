@@ -20,7 +20,7 @@ export default function TestimonialsSection() {
             <div className="flex items-start gap-5">
               <img
                 src="https://picsum.photos/seed/creatiwise-john/120/120"
-                alt="John D. profile"
+                alt="Roseline Thikan profile"
                 className="w-16 h-16 rounded-full object-cover grayscale flex-shrink-0"
               />
               <div>
@@ -30,7 +30,7 @@ export default function TestimonialsSection() {
                 <p className="text-neutral-600 leading-relaxed mb-5 font-body text-sm">
                   "The Helm Space completely changed my workday routine. I used to spend hours dealing with power outages and unstable fiber lines at home. Here, everything is always on, silent, and incredibly fast. The community is focused, and the quiet spaces are exactly what I need for deep work."
                 </p>
-                <p className="font-display font-semibold text-sm text-ink">John D.</p>
+                <p className="font-display font-semibold text-sm text-ink">Roseline Thikan</p>
                 <p className="text-neutral-400 text-xs font-body">Independent Software Engineer</p>
               </div>
             </div>
