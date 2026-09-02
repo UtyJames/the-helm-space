@@ -1,37 +1,51 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef } from "react";
 
 export default function HowWeWorkSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
+  const sectionRef   = useRef<HTMLElement>(null);
+  const pathRef      = useRef<SVGPathElement>(null);  // orange path — for emoji tracking
+  const maskRectRef  = useRef<SVGRectElement>(null);  // mask rect — for dotted reveal
+  const emojiRef     = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
-      const { gsap } = await import("gsap");
+      const { gsap }          = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
-      if (!sectionRef.current || !pathRef.current) return;
+      if (!sectionRef.current || !pathRef.current || !maskRectRef.current || !emojiRef.current) return;
 
-      const path = pathRef.current;
-      const length = path.getTotalLength();
+      const path     = pathRef.current;
+      const svgEl    = path.ownerSVGElement!;
+      const maskRect = maskRectRef.current;
+      const wrapper  = emojiRef.current;
+      const length   = path.getTotalLength();
 
-      // Set up initial stroke-dash properties
-      gsap.set(path, {
-        strokeDasharray: length,
-        strokeDashoffset: length,
-      });
+      // ── Reveal dotted path via mask rect height (preserves dot pattern) ──
+      // Start fully hidden
+      maskRect.setAttribute("height", "0");
 
-      // Animate stroke-dashoffset based on scroll
-      gsap.to(path, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 40%",
-          end: "bottom 70%",
-          scrub: 1,
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start:   "top 40%",
+        end:     "bottom 80%",
+        scrub:   1,
+        onUpdate(self) {
+          // Grow the mask rect from y=0 downward to reveal orange dots
+          maskRect.setAttribute("height", String(1050 * self.progress));
+
+          // Move emoji along path
+          const pt       = path.getPointAtLength(self.progress * length);
+          const svgRect  = svgEl.getBoundingClientRect();
+          const vb       = svgEl.viewBox.baseVal;   // 640 × 1050
+          const scaleX   = svgRect.width  / vb.width;
+          const scaleY   = svgRect.height / vb.height;
+          const parentEl = wrapper.parentElement as HTMLElement;
+          const parentRect = parentEl.getBoundingClientRect();
+          const x = svgRect.left - parentRect.left + pt.x * scaleX - 18;
+          const y = svgRect.top  - parentRect.top  + pt.y * scaleY - 18;
+          gsap.set(wrapper, { x, y });
         },
       });
     })();
@@ -53,8 +67,8 @@ export default function HowWeWorkSection() {
           </p>
         </div>
 
-        {/* Process Cards relative wrapper */}
-        <div className="relative mt-16 mx-auto md:mx-0 md:ml-8 md:w-[640px] md:h-[880px] h-auto">
+        {/* Process Cards relative wrapper — extra height so SVG tail bleeds into next section */}
+        <div className="relative mt-16 mx-auto md:mx-0 md:ml-8 md:w-[640px] md:h-[1050px] h-auto">
           {/* Marquee watermark band behind cards */}
           <div className="hidden md:block absolute top-[360px] left-1/2 -translate-x-1/2 w-[1400px] -z-10 rotate-[-3deg] overflow-hidden pointer-events-none select-none">
             <div className="flex w-max marquee-track">
@@ -77,23 +91,87 @@ export default function HowWeWorkSection() {
             </div>
           </div>
 
-          {/* SVG dashed connector */}
+          {/* ── SVG connector — overflow:visible so tail bleeds into next section ── */}
           <svg
-            className="hidden md:block absolute inset-0 w-full h-full -z-0"
-            viewBox="0 0 640 880"
+            className="hidden md:block absolute inset-0 w-full h-full -z-0 overflow-visible"
+            viewBox="0 0 640 1050"
             fill="none"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
+            <defs>
+              {/*
+                Mask rect grows from height=0 to height=1050 on scroll.
+                This reveals the orange dotted path without touching strokeDasharray,
+                so the dot pattern is always preserved.
+              */}
+              <mask id="path-reveal-mask">
+                <rect
+                  ref={maskRectRef}
+                  x="-40"
+                  y="0"
+                  width="720"
+                  height="0"
+                  fill="white"
+                />
+              </mask>
+            </defs>
+
+            {/* Ghost dotted underlay — always visible, full grey path */}
             <path
-              ref={pathRef}
-              d="M490 66 C 400 105, 220 135, 140 216 C 200 285, 420 385, 490 486 C 420 525, 220 565, 140 646 C 190 725, 320 785, 420 850"
-              stroke="#141414"
-              strokeWidth="1.3"
+              d="M490 66 C 400 105, 220 135, 140 216
+                 C 200 285, 420 385, 490 486
+                 C 420 525, 220 565, 140 646
+                 C 190 725, 320 785, 420 850
+                 C 480 900, 540 950, 470 1050"
+              stroke="#d4d4d4"
+              strokeWidth="1.6"
               strokeDasharray="5 6"
               fill="none"
             />
+
+            {/*
+              Orange dotted path — masked by the growing rect.
+              GSAP never touches stroke properties here, so dots stay intact.
+              pathRef is kept here for getPointAtLength (emoji tracking).
+            */}
+            <path
+              ref={pathRef}
+              d="M490 66 C 400 105, 220 135, 140 216
+                 C 200 285, 420 385, 490 486
+                 C 420 525, 220 565, 140 646
+                 C 190 725, 320 785, 420 850
+                 C 480 900, 540 950, 470 1050"
+              stroke="#f1552b"
+              strokeWidth="1.6"
+              strokeDasharray="5 6"
+              fill="none"
+              mask="url(#path-reveal-mask)"
+            />
+
+            {/* "Ready to focus!" handwriting text at the path end */}
+            <text
+              x="295"
+              y="1020"
+              fontFamily="'Caveat', cursive"
+              fontSize="30"
+              fill="#141414"
+              transform="rotate(-6, 295, 1020)"
+              className="select-none pointer-events-none"
+            >
+              Ready to focus!
+            </text>
           </svg>
+
+          {/* 😊 emoji that rides along the path on scroll */}
+          <div
+            ref={emojiRef}
+            className="hidden md:flex absolute top-0 left-0 w-9 h-9 items-center justify-center text-[22px] pointer-events-none select-none z-30 drop-shadow"
+            style={{ willChange: "transform" }}
+            aria-hidden="true"
+          >
+            😊
+          </div>
 
           {/* Card 01 - Pick your spot */}
           <div className="relative md:absolute md:top-[40px] md:right-[10px] w-full md:w-[280px] mb-10 md:mb-0 rotate-0 md:rotate-[4deg] z-10">
@@ -153,10 +231,6 @@ export default function HowWeWorkSection() {
                 Unlimited backup power, hot premium coffee, and a quiet room for calls are ready. Zero faff, maximum focus.
               </p>
             </div>
-            {/* Handwriting text flourish */}
-            <p className="font-hand text-2xl text-ink mt-4 md:mt-2 md:absolute md:top-[210px] md:left-[190px] rotate-[-3deg] whitespace-nowrap">
-              Ready to focus!
-            </p>
           </div>
         </div>
       </div>
