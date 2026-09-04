@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  RECEPTIONIST
+  SUPER_ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum DiscountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?
+  username  String   @unique
+  password  String
+  role      Role     @default(RECEPTIONIST)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shifts            Shift[]
+  checkIns          Booking[]         @relation("CheckedInBy")
+  discountsRequested DiscountRequest[] @relation("RequestedBy")
+  discountsDecided   DiscountRequest[] @relation("DecidedBy")
+}
+
+model Package {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  label     String
+  sublabel  String?
+  price     Int
+  origPrice Int?
+  unit      String
+  custom    Boolean  @default(false)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  reference      String        @unique
+  customerName   String
+  email          String
+  phone          String
+  packageId      String
+  package        Package       @relation(fields: [packageId], references: [id])
+  dates          Json?
+  amount         Int
+  discountAmount Int           @default(0)
+  status         BookingStatus @default(PENDING)
+  paystackRef    String?       @unique
+  checkedInAt    DateTime?
+  checkedInById  String?
+  checkedInBy    User?         @relation("CheckedInBy", fields: [checkedInById], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  payments Payment[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount      Int
+  channel     String?
+  paystackRef String   @unique
+  status      String   @default("success")
+  paidAt      DateTime @default(now())
+}
+
+model Shift {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clockInAt        DateTime  @default(now())
+  clockOutAt       DateTime?
+  clockInLocation  String
+  clockOutLocation String?
+  createdAt        DateTime  @default(now())
+}
+
+model DiscountRequest {
+  id            String         @id @default(cuid())
+  bookingRef    String?
+  customerName  String
+  amountOff     Int
+  reason        String
+  status        DiscountStatus @default(PENDING)
+  requestedById String
+  requestedBy   User           @relation("RequestedBy", fields: [requestedById], references: [id])
+  decidedById   String?
+  decidedBy     User?          @relation("DecidedBy", fields: [decidedById], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
