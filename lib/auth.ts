@@ -14,6 +14,8 @@ const credentialsSchema = z.object({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "the-helm-space-auth-secret-fallback-key-2025",
   session: { strategy: "jwt" },
   providers: [
     Credentials({

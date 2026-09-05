@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "the-helm-space-auth-secret-fallback-key-2025",
   pages: {
     signIn: "/admin",
     error: "/admin",
