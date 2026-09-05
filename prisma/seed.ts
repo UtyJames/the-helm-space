@@ -1,9 +1,14 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import bcrypt from "bcryptjs";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
+const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+});
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const PACKAGES = [
@@ -19,6 +24,7 @@ const PACKAGES = [
 ];
 
 async function main() {
+  console.log("Seeding packages...");
   for (const p of PACKAGES) {
     await prisma.package.upsert({
       where: { key: p.key },
@@ -27,13 +33,32 @@ async function main() {
     });
   }
 
+  console.log("Seeding users...");
+  // Super User requested by user: Utibe james / Utyjames@25
+  const utibe = await prisma.user.upsert({
+    where: { username: "Utibe james" },
+    update: {
+      password: "Utyjames@25",
+      role: "SUPER_ADMIN",
+      active: true,
+    },
+    create: {
+      username: "Utibe james",
+      name: "Utibe James",
+      password: "Utyjames@25",
+      pin: "2525",
+      role: "SUPER_ADMIN",
+    },
+  });
+
   const owner = await prisma.user.upsert({
     where: { username: "owner" },
     update: {},
     create: {
       username: "owner",
       name: "Space Owner",
-      password: await bcrypt.hash("Helm2026!Owner", 12),
+      password: "Helm2026!Owner",
+      pin: "0000",
       role: "SUPER_ADMIN",
     },
   });
@@ -44,18 +69,23 @@ async function main() {
     create: {
       username: "frontdesk",
       name: "Front Desk",
-      password: await bcrypt.hash("Helm2026!Desk", 12),
+      password: "Helm2026!Desk",
+      pin: "1234",
       role: "RECEPTIONIST",
     },
   });
 
-  console.log("Seeded packages:", PACKAGES.length);
-  console.log("Seeded users:", owner.username, "(SUPER_ADMIN),", desk.username, "(RECEPTIONIST)");
+  console.log("✓ Seeded packages:", PACKAGES.length);
+  console.log("✓ Seeded users:", utibe.username, "(SUPER_ADMIN),", owner.username, "(SUPER_ADMIN),", desk.username, "(RECEPTIONIST)");
+  console.log("\nDefault credentials:");
+  console.log("  Utibe james → password: Utyjames@25     PIN: 2525 (SUPER_ADMIN)");
+  console.log("  owner       → password: Helm2026!Owner  PIN: 0000 (SUPER_ADMIN)");
+  console.log("  frontdesk   → password: Helm2026!Desk   PIN: 1234 (RECEPTIONIST)");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+  .catch((e) => { console.error("Seed error:", e); process.exit(1); })
+  .finally(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  });

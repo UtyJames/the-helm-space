@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -26,21 +26,40 @@ enum DiscountStatus {
   REJECTED
 }
 
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+enum PermissionStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String?
   email     String?
   username  String   @unique
   password  String
+  pin       String?
   role      Role     @default(RECEPTIONIST)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shifts            Shift[]
-  checkIns          Booking[]         @relation("CheckedInBy")
-  discountsRequested DiscountRequest[] @relation("RequestedBy")
-  discountsDecided   DiscountRequest[] @relation("DecidedBy")
+  shifts              Shift[]
+  checkIns            Booking[]         @relation("CheckedInBy")
+  discountsRequested  DiscountRequest[] @relation("RequestedBy")
+  discountsDecided    DiscountRequest[] @relation("DecidedBy")
+  assignedTasks       Task[]            @relation("AssignedTo")
+  createdTasks        Task[]            @relation("CreatedBy")
+  taskComments        TaskComment[]
+  permissions         Permission[]      @relation("PermissionUser")
+  approvedPermissions Permission[]      @relation("PermissionApprover")
 }
 
 model Package {
@@ -67,7 +86,7 @@ model Booking {
   phone          String
   packageId      String
   package        Package       @relation(fields: [packageId], references: [id])
-  dates          Json?
+  dates          String?
   amount         Int
   discountAmount Int           @default(0)
   status         BookingStatus @default(PENDING)
@@ -75,6 +94,12 @@ model Booking {
   checkedInAt    DateTime?
   checkedInById  String?
   checkedInBy    User?         @relation("CheckedInBy", fields: [checkedInById], references: [id])
+  emailSent      Boolean       @default(false)
+  bookingType    String        @default("ONLINE")
+  paymentMethod  String?
+  amountPaid     Int?
+  changeGiven    Int?
+  notes          String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -116,4 +141,62 @@ model DiscountRequest {
   decidedBy     User?          @relation("DecidedBy", fields: [decidedById], references: [id])
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+}
+
+model Task {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus @default(PENDING)
+  dueDate      DateTime?
+  dueForDate   DateTime?
+  assignedToId String
+  assignedTo   User       @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdById  String
+  createdBy    User       @relation("CreatedBy", fields: [createdById], references: [id])
+  repeatType   String     @default("NONE")
+  repeatDays   Int?
+  repeatDates  String?
+  completedAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  comments TaskComment[]
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Permission {
+  id               String           @id @default(cuid())
+  userId           String
+  user             User             @relation("PermissionUser", fields: [userId], references: [id], onDelete: Cascade)
+  dateFrom         DateTime
+  dateTill         DateTime
+  durationDays     Int
+  reason           String
+  details          String
+  status           PermissionStatus @default(PENDING)
+  approvedById     String?
+  approvedBy       User?            @relation("PermissionApprover", fields: [approvedById], references: [id])
+  approvedAt       DateTime?
+  cancelledAt      DateTime?
+  seenBySuperAdmin Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model PinAttempt {
+  id          String    @id @default(cuid())
+  username    String    @unique
+  attempts    Int       @default(0)
+  lockedUntil DateTime?
+  updatedAt   DateTime  @updatedAt
 }

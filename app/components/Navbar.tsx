@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -20,10 +21,15 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [announcementVisible, setAnnouncementVisible] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [workspacesOpen, setWorkspacesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   useEffect(() => {
     if (!mobileOpen) return;
