@@ -463,8 +463,9 @@ export default function PerformancePage() {
                     <span className="w-3 h-3 rounded border border-[#f1552b] bg-orange-50" />
                     <span>Today</span>
                   </div>
-                  <span className="ml-auto text-[11px] text-neutral-400 italic">
-                    💡 Click any day to see shifts & tasks details
+                  <span className="ml-auto text-[11px] text-neutral-400 flex items-center gap-1.5 font-medium">
+                    <i className="ti ti-info-circle text-xs text-[#f1552b]" />
+                    <span>Click any day to see shifts & tasks details</span>
                   </span>
                 </div>
               </div>

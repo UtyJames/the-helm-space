@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
+import fs from "fs";
+import path from "path";
+
+function getLogoAttachment() {
+  try {
+    const pngPath = path.join(process.cwd(), "public", "THS-LOGO.png");
+    if (fs.existsSync(pngPath)) {
+      return {
+        filename: "ths-logo.png",
+        content: fs.readFileSync(pngPath),
+        cid: "thslogo",
+      };
+    }
+  } catch (err) {
+    console.warn("Could not read logo PNG:", err);
+  }
+  return null;
+}
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -78,6 +96,8 @@ export async function POST(req: Request) {
         const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://thehelmspace.com";
         const N = (n: number) =>
           new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n);
+        const logoAttachment = getLogoAttachment();
+        const logoSrc = logoAttachment ? "cid:thslogo" : `${APP_URL}/THS-LOGO.png`;
 
         const html = `
 <!DOCTYPE html>
@@ -87,33 +107,36 @@ export async function POST(req: Request) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Walk-In Booking Receipt — The Helm Space</title>
 </head>
-<body style="margin:0;padding:0;background:#f5f4f2;font-family:Inter,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f4f2;font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f2;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid #ebebeb;">
         <!-- Header -->
         <tr>
-          <td style="background:#141414;padding:32px 40px;">
-            <img src="${APP_URL}/THS-LOGO.svg" alt="The Helm Space" height="40" style="display:block;"/>
+          <td style="background:#141414;padding:28px 40px;border-bottom:2px solid #f1552b;">
+            <img src="${logoSrc}" alt="The Helm Space" height="38" style="display:block;height:38px;max-height:38px;width:auto;border:0;outline:none;" />
           </td>
         </tr>
         <!-- Hero -->
         <tr>
           <td style="padding:40px 40px 0;text-align:center;">
-            <div style="width:60px;height:60px;background:rgba(241,85,43,0.1);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
-              <span style="font-size:28px;">🏢</span>
+            <div style="width:56px;height:56px;background:rgba(241,85,43,0.1);border:1px solid rgba(241,85,43,0.25);border-radius:50%;margin:0 auto 16px;text-align:center;line-height:56px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f1552b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
             </div>
-            <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#141414;font-family:Georgia,serif;">Walk-In Booking Confirmed!</h1>
+            <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#141414;font-family:Georgia,serif;">Walk-In Booking Confirmed</h1>
             <p style="margin:0;font-size:15px;color:#666;">Hi ${customerName}, your onsite walk-in booking at The Helm Space is confirmed.</p>
           </td>
         </tr>
         <!-- Booking ID prominent -->
         <tr>
           <td style="padding:24px 40px;">
-            <div style="background:#141414;border-radius:16px;padding:24px;text-align:center;">
-              <p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:2px;font-family:monospace;">Your Booking ID</p>
+            <div style="background:#141414;border-radius:16px;padding:24px;text-align:center;border:1px solid #262626;">
+              <p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;font-family:monospace;">Your Booking ID</p>
               <p style="margin:0;font-size:22px;font-weight:700;color:#f1552b;font-family:monospace;letter-spacing:1px;">${booking.id}</p>
-              <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,0.4);font-mono:monospace;">Ref: ${reference} · Walk-In</p>
+              <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,0.4);font-family:monospace;">Ref: ${reference} · Walk-In Access</p>
             </div>
           </td>
         </tr>
@@ -150,7 +173,16 @@ export async function POST(req: Request) {
         <tr>
           <td style="padding:0 40px 32px;">
             <div style="background:#fef9f7;border:1px solid rgba(241,85,43,0.2);border-radius:12px;padding:20px;">
-              <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#f1552b;">☕ Welcome to The Helm Space!</p>
+              <div style="margin-bottom:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f1552b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                  <line x1="6" y1="1" x2="6" y2="4"></line>
+                  <line x1="10" y1="1" x2="10" y2="4"></line>
+                  <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                <span style="font-size:13px;font-weight:700;color:#f1552b;letter-spacing:0.5px;text-transform:uppercase;font-family:Inter,Arial,sans-serif;">Welcome To The Helm Space</span>
+              </div>
               <p style="margin:0;font-size:13px;color:#666;line-height:1.6;">
                 Your onsite access is active. Enjoy high-speed Wi-Fi, premium coffee, power backup, and our dedicated workspaces. If you need any assistance, reach out to our front desk team.
               </p>
@@ -160,7 +192,7 @@ export async function POST(req: Request) {
         <!-- Footer -->
         <tr>
           <td style="background:#f8f7f5;padding:24px 40px;text-align:center;border-top:1px solid #ebebeb;">
-            <p style="margin:0 0 4px;font-size:12px;color:#999;">The Helm Space · Lagos, Nigeria</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#999;font-weight:600;">The Helm Space · Nasarawa, Nigeria</p>
             <p style="margin:0;font-size:11px;color:#bbb;">Thank you for choosing The Helm Space. Keep this email for your records.</p>
           </td>
         </tr>
@@ -175,6 +207,7 @@ export async function POST(req: Request) {
           to: [email],
           subject: `Walk-In Booking Receipt — ${booking.id} | The Helm Space`,
           html,
+          attachments: logoAttachment ? [logoAttachment] : undefined,
         });
 
         await prisma.booking.update({
