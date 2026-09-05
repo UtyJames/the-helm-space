@@ -21,9 +21,27 @@ const fmt = (d: string) =>
   new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="text-xl">🥇</span>;
-  if (rank === 2) return <span className="text-xl">🥈</span>;
-  if (rank === 3) return <span className="text-xl">🥉</span>;
+  if (rank === 1) {
+    return (
+      <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-sm" title="Rank 1">
+        <i className="ti ti-trophy text-base" />
+      </div>
+    );
+  }
+  if (rank === 2) {
+    return (
+      <div className="w-8 h-8 rounded-xl bg-slate-400/15 border border-slate-400/30 flex items-center justify-center text-slate-400 shadow-sm" title="Rank 2">
+        <i className="ti ti-medal text-base" />
+      </div>
+    );
+  }
+  if (rank === 3) {
+    return (
+      <div className="w-8 h-8 rounded-xl bg-amber-700/15 border border-amber-700/30 flex items-center justify-center text-amber-700 shadow-sm" title="Rank 3">
+        <i className="ti ti-medal-2 text-base" />
+      </div>
+    );
+  }
   return (
     <span
       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white font-mono"
@@ -227,15 +245,17 @@ export default function CustomersPage() {
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-[#141414]">{c.totalBookings} total</span>
-                            <div className="flex items-center gap-1 text-[10px]">
+                            <div className="flex items-center gap-1.5 text-[10px]">
                               {c.walkInBookings > 0 && (
-                                <span className="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
-                                  🏢 {c.walkInBookings} walk-in
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 font-medium">
+                                  <i className="ti ti-building text-xs text-purple-600" />
+                                  {c.walkInBookings} walk-in
                                 </span>
                               )}
                               {c.onlineBookings > 0 && (
-                                <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                                  🌐 {c.onlineBookings} online
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-medium">
+                                  <i className="ti ti-world text-xs text-blue-600" />
+                                  {c.onlineBookings} online
                                 </span>
                               )}
                             </div>
@@ -294,7 +314,7 @@ export default function CustomersPage() {
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">👑</span>
+              <i className="ti ti-crown text-amber-400 text-lg" />
               <p className="text-white/60 text-[10px] font-mono tracking-widest uppercase">
                 Top Client Spend Leaderboard
               </p>
@@ -345,16 +365,27 @@ export default function CustomersPage() {
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-[#141414] text-sm truncate">{c.name}</p>
                     {c.rank === 1 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#f1552b] border border-orange-200">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#f1552b] border border-orange-200">
+                        <i className="ti ti-flame text-xs text-[#f1552b]" />
                         Top Spender
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-neutral-400 font-mono truncate">{c.email || c.phone}</p>
-                  <div className="flex items-center gap-2 mt-1 text-[10px] text-neutral-500">
-                    <span>{c.totalBookings} total bookings</span>
-                    {c.walkInBookings > 0 && <span>(🏢 {c.walkInBookings} walk-in)</span>}
-                    {c.onlineBookings > 0 && <span>(🌐 {c.onlineBookings} online)</span>}
+                  <div className="flex items-center gap-3 mt-1 text-[10px] text-neutral-500">
+                    <span className="font-medium">{c.totalBookings} total bookings</span>
+                    {c.walkInBookings > 0 && (
+                      <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">
+                        <i className="ti ti-building text-xs text-purple-600" />
+                        {c.walkInBookings} walk-in
+                      </span>
+                    )}
+                    {c.onlineBookings > 0 && (
+                      <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                        <i className="ti ti-world text-xs text-blue-600" />
+                        {c.onlineBookings} online
+                      </span>
+                    )}
                   </div>
                 </div>
 
