@@ -1,0 +1,104 @@
+export function bachsBaseUrl() {
+  return (process.env.BACHS_API_URL ?? "https://api.bachs.io").replace(/\/$/, "");
+}
+
+export function bachsSecret() {
+  return process.env.BACHS_SECRET_KEY ?? process.env.BACHS_API_KEY ?? "";
+}
+
+export function bachsWebhookSecret() {
+  return process.env.BACHS_WEBHOOK_SECRET ?? process.env.BACHS_SECRET_KEY ?? "";
+}
+
+export async function createBachsCheckout(params: {
+  reference: string;
+  amount: number;
+  currency?: string;
+  email: string;
+  customerName: string;
+  packageLabel: string;
+  packageId: string;
+  successUrl: string;
+  cancelUrl: string;
+  metadata?: Record<string, string>;
+}) {
+  const secret = bachsSecret();
+  if (!secret) throw new Error("BACHS_SECRET_KEY not configured");
+  const base = bachsBaseUrl();
+  const url = `${base}/v1/checkout-sessions`;
+
+  // Bachs expects decimal string amounts like "5000.00"
+  const amountStr = Number(params.amount).toFixed(2);
+
+  const body: Record<string, unknown> = {
+    // Common Bachs checkout shape — uses product inline via amount
+    amount: amountStr,
+    currency: params.currency ?? "NGN",
+    reference: params.reference,
+    customer: { email: params.email, name: params.customerName },
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+    metadata: {
+      reference: params.reference,
+      packageId: params.packageId,
+      packageLabel: params.packageLabel,
+      ...(params.metadata ?? {}),
+    },
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json?.message || json?.error || `Bachs checkout failed (${res.status})`);
+  }
+  // Hosted URL variants across Bachs versions: checkout_url, url, hosted_url
+  const checkoutUrl: string | undefined =
+    json?.data?.checkout_url ?? json?.data?.url ?? json?.data?.hosted_url ?? json?.checkout_url ?? json?.url;
+  const checkoutId: string | undefined =
+    json?.data?.id ?? json?.data?.checkout_id ?? json?.id ?? json?.checkout_id;
+  if (!checkoutUrl) throw new Error("Bachs did not return a checkout URL");
+  return { checkoutUrl, checkoutId: checkoutId ?? params.reference, raw: json };
+}
+
+export async function verifyBachsCheckout(checkoutIdOrRef: string) {
+  const secret = bachsSecret();
+  if (!secret) throw new Error("BACHS_SECRET_KEY not configured");
+  const base = bachsBaseUrl();
+  // Try by id then by reference
+  const candidates = [
+    `${base}/v1/checkout-sessions/${encodeURIComponent(checkoutIdOrRef)}`,
+    `${base}/v1/checkouts/${encodeURIComponent(checkoutIdOrRef)}`,
+    `${base}/v1/payments/${encodeURIComponent(checkoutIdOrRef)}`,
+  ];
+  let lastErr: unknown = null;
+  for (const u of candidates) {
+    const r = await fetch(u, { headers: { Authorization: `Bearer ${secret}` } });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && (j?.data || j?.status || j?.id)) return j?.data ?? j;
+    lastErr = j;
+  }
+  throw new Error((lastErr as { message?: string })?.message ?? "Bachs verification failed");
+}
+
+export function isPaidStatus(data: unknown): { paid: boolean; channel?: string; amount?: number; paidAt?: string } {
+  const d = data as Record<string, unknown>;
+  const status = String(d?.status ?? d?.state ?? "").toLowerCase();
+  const paid = ["paid", "succeeded", "success", "completed", "captured"].includes(status);
+  const nested = (d?.data as Record<string, unknown>) ?? d;
+  const nStatus = String(nested?.status ?? "").toLowerCase();
+  const nPaid = ["paid", "succeeded", "success", "completed"].includes(nStatus);
+  return {
+    paid: paid || nPaid || status === "paid",
+    channel: String(d?.channel ?? nested?.channel ?? "bachs"),
+    amount: typeof nested?.amount === "number" ? nested.amount : typeof d?.amount === "number" ? d.amount : undefined,
+    paidAt: String(nested?.paid_at ?? d?.paid_at ?? d?.paidAt ?? ""),
+  };
+}

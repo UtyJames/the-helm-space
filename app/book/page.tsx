@@ -6,16 +6,27 @@ import toast, { Toaster } from "react-hot-toast";
 type PackageId = "monthly-standard" | "monthly-premium" | "weekend" | "team-desks" | "meeting-room" | "hall" | "daily-dedicated" | "daily-shared" | "custom";
 
 const PKGS = [
-  { id: "monthly-standard", key: "monthly-standard", label: "The Helm Monthly Package", sublabel: null, price: 70000, orig: 75000, unit: "/month", custom: false },
-  { id: "monthly-premium",  key: "monthly-premium",  label: "The Helm Monthly Package", sublabel: "Premium", price: 80000, orig: 85000, unit: "/month", custom: false },
-  { id: "weekend",          key: "weekend",          label: "The Helm Weekend Package", sublabel: null, price: 12000, orig: null, unit: "/weekend", custom: false },
-  { id: "team-desks",       key: "team-desks",       label: "Team Desks", sublabel: "Shared Desk - team of 4", price: 11000, orig: 12500, unit: "/month", custom: false },
-  { id: "meeting-room",     key: "meeting-room",     label: "Meeting Room", sublabel: "9 seats", price: 15000, orig: 25000, unit: "/session", custom: false },
-  { id: "hall",             key: "hall",             label: "The Helm Space Hall", sublabel: "For Rent", price: 80000, orig: 100000, unit: "/day", custom: false },
-  { id: "daily-dedicated",  key: "daily-dedicated",  label: "Daily Pass", sublabel: "Dedicated Desk", price: 2000, orig: 4000, unit: "/day", custom: false },
   { id: "daily-shared",     key: "daily-shared",     label: "Daily Pass", sublabel: "Shared Table", price: 1500, orig: 3500, unit: "/day", custom: false },
   { id: "custom",           key: "custom",           label: "Custom Date Pass", sublabel: "Shared Table - pick your days", price: 1500, orig: null, unit: "/day", custom: true },
+  { id: "daily-dedicated",  key: "daily-dedicated",  label: "Daily Pass", sublabel: "Dedicated Desk", price: 2000, orig: 4000, unit: "/day", custom: false },
+  { id: "team-desks",       key: "team-desks",       label: "Team Desks", sublabel: "Shared Desk - team of 4", price: 11000, orig: 12500, unit: "/month", custom: false },
+  { id: "weekend",          key: "weekend",          label: "The Helm Weekend Package", sublabel: null, price: 12000, orig: null, unit: "/weekend", custom: false },
+  { id: "meeting-room",     key: "meeting-room",     label: "Meeting Room", sublabel: "9 seats", price: 15000, orig: 25000, unit: "/session", custom: false },
+  { id: "monthly-standard", key: "monthly-standard", label: "The Helm Monthly Package", sublabel: null, price: 70000, orig: 75000, unit: "/month", custom: false },
+  { id: "hall",             key: "hall",             label: "The Helm Space Hall", sublabel: "For Rent", price: 80000, orig: 100000, unit: "/day", custom: false },
+  { id: "monthly-premium",  key: "monthly-premium",  label: "The Helm Monthly Package", sublabel: "Premium", price: 80000, orig: 85000, unit: "/month", custom: false },
 ];
+
+const NAV_PILLS = [
+  { id: "daily-shared",     label: "Shared ₦1,500" },
+  { id: "custom",           label: "Custom" },
+  { id: "daily-dedicated",  label: "Dedicated ₦2k" },
+  { id: "team-desks",       label: "Team" },
+  { id: "weekend",          label: "Weekend" },
+  { id: "meeting-room",     label: "Meeting Room" },
+  { id: "monthly-standard", label: "Monthly" },
+  { id: "hall",             label: "Hall" },
+] as const;
 
 const N = (n: number) => "₦" + n.toLocaleString("en-NG");
 
@@ -60,13 +71,22 @@ export default function BookPage() {
   const [step, setStep] = useState<Step>(1);
   const [picked, setPicked] = useState<PackageId | null>(null);
   const [dates,  setDates]  = useState<Set<string>>(new Set());
+  const [qty,    setQty]    = useState(1);
   const [form,   setForm]   = useState({ name: "", email: "", phone: "" });
   const [isPending, start]  = useTransition();
 
   const pkg   = PKGS.find(p => p.id === picked);
-  const total = useMemo(() => !pkg ? 0 : pkg.custom ? dates.size * 1500 : pkg.price, [pkg, dates]);
+  const total = useMemo(() => !pkg ? 0 : pkg.custom ? dates.size * 1500 : pkg.price * qty, [pkg, dates, qty]);
 
   const toggle = (k: string) => setDates(prev => { const n = new Set(prev); n.has(k) ? n.delete(k) : n.add(k); return n; });
+
+  function unitLabel(unit: string) {
+    if (unit.includes("day")) return "day";
+    if (unit.includes("month")) return "month";
+    if (unit.includes("session")) return "session";
+    if (unit.includes("weekend")) return "weekend";
+    return "unit";
+  }
 
   const canProceedStep1 = pkg && (!pkg.custom || dates.size > 0);
   const canProceedStep2 = form.name.trim() && form.email.trim() && form.phone.trim();
@@ -83,6 +103,7 @@ export default function BookPage() {
           body: JSON.stringify({
             packageId: pkg.id,
             dates: pkg.custom ? Array.from(dates) : null,
+            quantity: pkg.custom ? dates.size : qty,
             amount: total,
             customerName: form.name,
             email: form.email,
@@ -99,7 +120,7 @@ export default function BookPage() {
         }
 
         toast.success("Booking created! Redirecting to payment…");
-        setTimeout(() => { window.location.href = data.authorizationUrl; }, 800);
+        setTimeout(() => { window.location.href = data.authorizationUrl ?? data.checkoutUrl; }, 800);
       } catch {
         toast.dismiss(toastId);
         toast.error("Network error. Please check your connection.");
@@ -119,7 +140,7 @@ export default function BookPage() {
         <p className="mt-3 text-sm text-neutral-500 max-w-md leading-relaxed">
           {step === 1 ? "Select a plan, pick your dates if needed, then pay securely."
            : step === 2 ? "Tell us who you are so we can confirm your booking."
-           : "Review your order and complete payment via Paystack."}
+           : "Review your order and complete payment."}
         </p>
 
         {/* Step indicators */}
@@ -140,14 +161,34 @@ export default function BookPage() {
 
         {/* Left — Step content */}
         <div>
+          {/* Mobile quick-nav pills */}
+          {step === 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-3 -mx-6 px-6 md:mx-0 md:px-0 mb-4 lg:hidden scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
+              {NAV_PILLS.map(pill => (
+                <button key={pill.id} type="button"
+                  onClick={() => {
+                    setPicked(pill.id as PackageId); setQty(1);
+                    document.getElementById(`pkg-${pill.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }}
+                  className={["flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors",
+                    picked === pill.id ? "text-white border-[#f1552b]" : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"].join(" ")}
+                  style={picked === pill.id ? { background: "#f1552b" } : undefined}>
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* STEP 1 — Package selection */}
           {step === 1 && (
             <div className="space-y-3">
               {PKGS.map(p => {
                 const on = picked === p.id;
                 return (
-                  <button key={p.id}
-                    onClick={() => { setPicked(on ? null : p.id as PackageId); if (!p.custom) setDates(new Set()); }}
+                  <div key={p.id} id={`pkg-${p.id}`}
+                    role="button" tabIndex={0}
+                    onClick={() => { const selecting = !on; setPicked(selecting ? p.id as PackageId : null); if (selecting) setQty(1); if (!p.custom) setDates(new Set()); }}
+                    onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); const selecting = !on; setPicked(selecting ? p.id as PackageId : null); if (selecting) setQty(1); if (!p.custom) setDates(new Set()); } }}
                     className={["w-full text-left rounded-2xl border p-5 transition-all duration-200 cursor-pointer",
                       on ? "border-[#f1552b] bg-white shadow-md" : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm"].join(" ")}>
                     <div className="flex items-center justify-between gap-4">
@@ -167,12 +208,41 @@ export default function BookPage() {
                         <p className="text-[10px] text-neutral-400 font-mono">{p.custom?"/day - pick dates":p.unit}</p>
                       </div>
                     </div>
+                    {on&&!p.custom&&(
+                      <div className="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between" onClick={e=>e.stopPropagation()}>
+                        <div>
+                          <p className="text-xs font-semibold text-neutral-600">Number of {unitLabel(p.unit)}s</p>
+                          <p className="text-[10px] text-neutral-400 mt-0.5">Min 1 · Max 30</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={()=>setQty(q=>Math.max(1,q-1))}
+                            className="w-9 h-9 rounded-full border border-neutral-200 bg-white flex items-center justify-center text-ink hover:border-neutral-300 transition-colors disabled:opacity-40"
+                            aria-label="Decrease quantity">−</button>
+                          <input type="number" inputMode="numeric" min={1} max={30}
+                            value={qty}
+                            onChange={e=>{
+                              const v = e.target.value === "" ? 1 : Math.min(30, Math.max(1, parseInt(e.target.value,10) || 1));
+                              setQty(v);
+                            }}
+                            onBlur={e=>{
+                              const v = parseInt(e.target.value,10);
+                              if (!v || v < 1) setQty(1);
+                              else if (v > 30) setQty(30);
+                            }}
+                            className="w-14 h-9 rounded-xl border border-neutral-200 bg-white text-center text-sm font-bold text-ink focus:outline-none focus:border-[#f1552b] focus:ring-1 focus:ring-[#f1552b]/20"
+                            aria-label="Number of units"/>
+                          <button type="button" onClick={()=>setQty(q=>Math.min(30,q+1))}
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors" style={{background:"#141414"}}
+                            aria-label="Increase quantity">+</button>
+                        </div>
+                      </div>
+                    )}
                     {on&&p.custom&&(
                       <div className="mt-4 pt-4 border-t border-neutral-100" onClick={e=>e.stopPropagation()}>
                         <Calendar sel={dates} onToggle={toggle}/>
                       </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -216,6 +286,7 @@ export default function BookPage() {
                     { label: "Name", value: form.name },
                     { label: "Email", value: form.email },
                     { label: "Phone", value: form.phone },
+                    ...(!pkg.custom ? [{ label: "Quantity", value: `${qty} ${unitLabel(pkg.unit)}${qty > 1 ? "s" : ""}` }] : []),
                     ...(pkg.custom && dates.size > 0 ? [{ label: "Days", value: `${dates.size} day${dates.size > 1 ? "s" : ""}` }] : []),
                     { label: "Amount", value: N(total), bold: true },
                   ].map(({ label, value, bold }) => (
@@ -243,11 +314,12 @@ export default function BookPage() {
                   <div>
                     <p className="font-display font-semibold text-sm text-ink">{pkg.label}</p>
                     {pkg.sublabel&&<p className="text-xs text-neutral-400 mt-0.5">{pkg.sublabel}</p>}
+                    {!pkg.custom&&<p className="text-xs mt-1" style={{color:"#f1552b"}}>{qty} {unitLabel(pkg.unit)}{qty!==1?"s":""} × {N(pkg.price)}</p>}
                     {pkg.custom&&dates.size>0&&<p className="text-xs mt-1" style={{color:"#f1552b"}}>{dates.size} day{dates.size!==1?"s":""} selected</p>}
                     {pkg.custom&&dates.size===0&&<p className="text-xs text-neutral-400 mt-1">No dates selected</p>}
                   </div>
                   <p className="font-display font-semibold text-sm text-ink whitespace-nowrap">
-                    {pkg.custom?`${dates.size} x ₦1,500`:N(pkg.price)}
+                    {pkg.custom?`${dates.size} x ₦1,500`:total!==pkg.price?`${qty} × ${N(pkg.price)}`:`${N(pkg.price)}`}
                   </p>
                 </div>
                 <hr className="border-neutral-100"/>
@@ -292,11 +364,11 @@ export default function BookPage() {
                   <button onClick={handlePay} disabled={isPending}
                     className="w-full py-3.5 rounded-full font-display font-semibold text-sm text-white transition-all shadow-sm hover:opacity-90"
                     style={{ background: "#f1552b" }}>
-                    {isPending ? "Processing…" : `Pay ${N(total)} via Paystack`}
+                    {isPending ? "Processing…" : `Pay ${N(total)}`}
                   </button>
                 )}
                 <p className="text-center text-[11px] text-neutral-400">
-                  {step === 3 ? "You'll be redirected to Paystack's secure checkout." : "Secure checkout · No hidden fees"}
+                  {step === 3 ? "You'll be redirected to secure checkout." : "Secure checkout · No hidden fees"}
                 </p>
               </div>
             ) : (
