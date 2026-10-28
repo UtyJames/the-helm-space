@@ -67,10 +67,12 @@ export async function createBachsCheckout(params: {
     throw new Error(typeof msg === "string" ? `${msg} :: ${detail}` : `Bachs checkout failed (${res.status}) :: ${detail}`);
   }
   // Hosted URL variants across Bachs versions: checkout_url, url, hosted_url
+  const d = (json as Record<string, unknown>);
+  const nested = (d?.data as Record<string, unknown>) ?? d;
   const checkoutUrl: string | undefined =
-    json?.data?.checkout_url ?? json?.data?.url ?? json?.data?.hosted_url ?? json?.checkout_url ?? json?.url;
+    (nested?.checkout_url as string) ?? (nested?.url as string) ?? (nested?.hosted_url as string) ?? (d?.checkout_url as string) ?? (d?.url as string);
   const checkoutId: string | undefined =
-    json?.data?.id ?? json?.data?.checkout_id ?? json?.id ?? json?.checkout_id;
+    (nested?.id as string) ?? (nested?.checkout_id as string) ?? (d?.id as string) ?? (d?.checkout_id as string);
   if (!checkoutUrl) throw new Error("Bachs did not return a checkout URL");
   return { checkoutUrl, checkoutId: checkoutId ?? params.reference, raw: json };
 }
