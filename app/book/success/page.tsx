@@ -27,42 +27,49 @@ interface BookingInfo {
 function SuccessContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref") || searchParams.get("reference");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(ref));
   const [booking, setBooking] = useState<BookingInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!ref) {
-      setError("No booking reference provided.");
-      setLoading(false);
-      return;
-    }
+    if (!ref) return;
 
     let isMounted = true;
-    async function verify() {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    async function verify(attempt = 0) {
+      let retrying = false;
       try {
-        const res = await fetch(`/api/bookings/verify?ref=${encodeURIComponent(ref!)}`);
+        const res = await fetch(`/api/bookings/verify?ref=${encodeURIComponent(ref!)}`, { cache: "no-store" });
         const data = await res.json();
         if (!isMounted) return;
 
-        if (res.ok && data.success && data.booking) {
+        if (res.ok && data.paid && data.booking) {
           setBooking(data.booking);
+          setPending(false);
+        } else if (res.ok && data.pending && attempt < 14) {
+          retrying = true;
+          timer = setTimeout(() => void verify(attempt + 1), 2000);
+        } else if (res.ok && data.pending) {
+          setPending(true);
         } else {
-          setError(data.error || "Could not verify your payment. Please reach out to support.");
+          setError(data.error || "Payment has not been confirmed. Please contact The Helm Space if you completed payment.");
         }
-      } catch (e) {
-        if (isMounted) setError("Network error while verifying payment.");
+      } catch {
+        if (isMounted) setError("Network error while checking your booking. Please try again.");
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted && !retrying) setLoading(false);
       }
     }
 
     verify();
     return () => {
       isMounted = false;
+      if (timer) clearTimeout(timer);
     };
-  }, [ref]);
+  }, [ref, retryCount]);
 
   const copyRef = () => {
     if (!ref) return;
@@ -80,13 +87,43 @@ function SuccessContent() {
           Verifying Your Payment…
         </h2>
         <p className="text-sm text-neutral-500 mt-2 max-w-sm">
-          Please wait while we confirm your transaction with Paystack and activate your reservation.
+          Please wait while Bachs confirms your payment and we activate your reservation.
         </p>
       </div>
     );
   }
 
-  if (error || !booking) {
+  if (pending) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl border border-neutral-200 shadow-sm text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">…</div>
+        <h2 className="text-xl font-bold text-[#141414] mb-2" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
+          Payment is processing
+        </h2>
+        <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
+          Your booking is saved, but Bachs has not confirmed the payment yet. This can take a short time. You can check again without paying twice.
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => {
+              setPending(false);
+              setLoading(true);
+              setRetryCount((count) => count + 1);
+            }}
+            className="w-full py-2.5 px-4 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
+            style={{ background: "#f1552b" }}
+          >
+            Check payment status
+          </button>
+          <Link href="/" className="w-full py-2.5 px-4 rounded-xl border border-neutral-200 text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition text-center">
+            Return to Homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!ref || error || !booking) {
     return (
       <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl border border-neutral-200 shadow-sm text-center">
         <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
@@ -95,7 +132,9 @@ function SuccessContent() {
         <h2 className="text-xl font-bold text-[#141414] mb-2" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
           Verification Issue
         </h2>
-        <p className="text-sm text-neutral-500 mb-6 leading-relaxed">{error}</p>
+        <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
+          {error ?? (ref ? "Could not verify your payment. Please reach out to support." : "No booking reference provided.")}
+        </p>
         <div className="flex flex-col gap-2">
           {ref && (
             <button

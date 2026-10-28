@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Bachs payments
+
+The booking form creates a hosted Bachs checkout. A signed `collection.succeeded` or paid `checkout.completed` webhook records the payment; the return page only reads booking status and never treats the redirect as proof of payment.
+
+1. Start with a Bachs sandbox secret key and the sandbox API URL from `.env.example`.
+2. In the Bachs Developer Portal, add an HTTPS webhook endpoint pointing to `https://<your-domain>/api/webhooks/bachs`, subscribe to `collection.succeeded` and `checkout.completed`, then copy that endpoint's signing secret.
+3. Configure `BACHS_SECRET_KEY`, `BACHS_API_URL`, `BACHS_WEBHOOK_SECRET`, and `NEXT_PUBLIC_APP_URL` in the local environment or deployment secret settings. Keep the API key and webhook signing secret private.
+4. For production, use the production API URL with a live key and the production webhook endpoint's signing secret. Do not mix sandbox keys with production URLs or vice versa.
+
 ## Getting Started
 
 First, run the development server:

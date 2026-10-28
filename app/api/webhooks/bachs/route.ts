@@ -1,100 +1,181 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
+import { bachsWebhookSecret, parseNgnAmount, verifyBachsWebhookSignature } from "@/lib/bachs";
+import { sendBookingConfirmationEmail } from "@/lib/booking-confirmation";
 
-function verifySignature(rawBody: string, timestamp: string, signature: string, secret: string): boolean {
-  // Bachs signs HMAC-SHA256 over "{timestamp}.{rawBody}" hex digest
-  const payload = `${timestamp}.${rawBody}`;
-  const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
-  // Also try without timestamp prefix (some versions sign rawBody only)
-  const expectedRaw = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  const sig = signature.replace(/^sha256=/, "");
-  try {
-    if (sig.length === expected.length && crypto.timingSafeEqual(Buffer.from(sig, "hex"), Buffer.from(expected, "hex"))) return true;
-    if (sig.length === expectedRaw.length && crypto.timingSafeEqual(Buffer.from(sig, "hex"), Buffer.from(expectedRaw, "hex"))) return true;
-  } catch {}
-  return sig === expected || sig === expectedRaw;
+type BachsEvent = {
+  id?: unknown;
+  type?: unknown;
+  created_at?: unknown;
+  data?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 export async function POST(req: Request) {
+  const secret = bachsWebhookSecret();
+  if (!secret) {
+    console.error("Bachs webhook rejected: BACHS_WEBHOOK_SECRET is not configured");
+    return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
+  }
+
   const rawBody = await req.text();
-  const signature = req.headers.get("x-bachs-signature") ?? req.headers.get("x-bachs-signature-256") ?? "";
-  const timestamp = req.headers.get("x-bachs-timestamp") ?? "";
-  const secret = process.env.BACHS_WEBHOOK_SECRET ?? process.env.BACHS_SECRET_KEY ?? "";
-
-  // If secret configured, enforce signature
-  if (secret && signature) {
-    if (!verifySignature(rawBody, timestamp, signature, secret)) {
-      console.warn("Bachs webhook: invalid signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-  } else if (secret && !signature) {
-    console.warn("Bachs webhook: missing signature header");
+  if (rawBody.length > 256_000) {
+    return NextResponse.json({ error: "Webhook payload is too large." }, { status: 413 });
+  }
+  if (!verifyBachsWebhookSignature(rawBody, req.headers, secret)) {
+    console.warn("Bachs webhook rejected: invalid or stale signature");
+    return NextResponse.json({ error: "Invalid signature." }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
+  let event: BachsEvent;
   try {
-    body = JSON.parse(rawBody);
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!isRecord(parsed)) throw new Error("Webhook body must be an object");
+    event = parsed;
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
   }
 
-  const type = String((body as Record<string, unknown>).type ?? (body as Record<string, unknown>).event ?? "").toLowerCase();
-  const data = ((body as Record<string, unknown>).data ?? body) as Record<string, unknown>;
-  const reference =
-    String(data?.reference ?? data?.metadata_reference ?? (data?.metadata as Record<string, unknown>)?.reference ?? "") ||
-    String((body as Record<string, unknown>).reference ?? "");
+  const type = typeof event.type === "string" ? event.type : "";
+  const data = isRecord(event.data) ? event.data : null;
+  if (!data) return NextResponse.json({ error: "Invalid event data." }, { status: 400 });
 
-  // Only handle payment success events
-  const successEvents = ["collection.succeeded", "checkout.completed", "payment.succeeded", "payment.paid", "charge.succeeded", "transaction.success"];
-  const isSuccess = successEvents.some((e) => type.includes(e.split(".")[0]) && type.includes("succeed")) || type.includes("completed") || type.includes("succeeded");
-  // Also accept explicit status field
-  const status = String(data?.status ?? "").toLowerCase();
-  const isPaidStatus = ["paid", "succeeded", "success", "completed"].includes(status);
-
-  if (!isSuccess && !isPaidStatus && type) {
-    // Acknowledge but ignore non-success events
-    return NextResponse.json({ received: true, ignored: type });
+  const status = String(data.status ?? "").toLowerCase();
+  const isCollectionSucceeded = type === "collection.succeeded" && status === "succeeded";
+  const isPaidCheckout = type === "checkout.completed" && String(data.payment_status ?? "").toLowerCase() === "paid";
+  if (type === "collection.succeeded" && !isCollectionSucceeded) {
+    console.warn("Bachs collection requires reconciliation", { status });
+    return NextResponse.json({ received: true, ignored: type, status });
+  }
+  if (type === "checkout.completed" && data.mode !== undefined && data.mode !== "payment") {
+    return NextResponse.json({ received: true, ignored: type, mode: data.mode });
+  }
+  if (!isCollectionSucceeded && !isPaidCheckout) {
+    return NextResponse.json({ received: true, ignored: type || "unknown" });
   }
 
-  if (!reference) {
-    console.warn("Bachs webhook: no reference in payload", { type });
-    return NextResponse.json({ received: true, warning: "no reference" });
+  const reference = typeof data.reference === "string" ? data.reference : "";
+  const checkoutId = typeof data.checkout_id === "string" ? data.checkout_id : "";
+  if (!reference && !checkoutId) {
+    console.error("Bachs payment event is missing its booking reference and checkout ID", { type });
+    return NextResponse.json({ error: "Payment reference is missing." }, { status: 400 });
+  }
+
+  const currency = String(data.currency ?? "").toUpperCase();
+  const amount = parseNgnAmount(data.amount);
+  if (currency !== "NGN" || amount === null) {
+    console.error("Bachs payment event has an unsupported currency or amount", { type, currency });
+    return NextResponse.json({ error: "Payment currency or amount is invalid." }, { status: 400 });
+  }
+
+  const charge = isRecord(data.charge) ? data.charge : null;
+  const chargeId = typeof data.charge_id === "string"
+    ? data.charge_id
+    : typeof charge?.id === "string"
+      ? charge.id
+      : "";
+  const paymentReference = checkoutId || chargeId;
+  if (!paymentReference) {
+    console.error("Bachs payment event is missing its charge and checkout IDs", { type });
+    return NextResponse.json({ error: "Payment identifier is missing." }, { status: 400 });
   }
 
   try {
-    const booking = await prisma.booking.findUnique({ where: { reference } });
+    const booking = reference
+      ? await prisma.booking.findUnique({ where: { reference }, include: { package: true } })
+      : await prisma.booking.findFirst({ where: { paystackRef: checkoutId }, include: { package: true } });
     if (!booking) {
-      console.warn("Bachs webhook: booking not found for reference", reference);
-      return NextResponse.json({ received: true, warning: "booking not found" });
-    }
-    if (booking.status === "PAID") {
-      return NextResponse.json({ received: true, alreadyPaid: true });
+      console.error("Bachs payment event did not match a booking", { type });
+      return NextResponse.json({ error: "Booking not found." }, { status: 404 });
     }
 
-    await prisma.booking.update({ where: { reference }, data: { status: "PAID", paymentMethod: "bachs" } });
-
-    const amountRaw = data?.amount;
-    const amountNgn =
-      typeof amountRaw === "number" ? (amountRaw > 10000 ? Math.round(amountRaw / 100) : Math.round(amountRaw)) : booking.amount;
-    const paystackRef = String(data?.id ?? data?.checkout_id ?? reference);
-
-    await prisma.payment.upsert({
-      where: { paystackRef },
-      create: {
+    if (checkoutId && booking.paystackRef && booking.paystackRef !== checkoutId) {
+      console.error("Bachs checkout ID did not match the booking", { type, bookingId: booking.id });
+      return NextResponse.json({ error: "Checkout does not match the booking." }, { status: 409 });
+    }
+    if (booking.amount !== amount) {
+      console.error("Bachs payment amount did not match the booking", {
         bookingId: booking.id,
-        amount: amountNgn,
-        channel: String(data?.channel ?? "bachs"),
-        paystackRef,
-        status: "success",
-        paidAt: data?.paid_at ? new Date(String(data.paid_at)) : new Date(),
-      },
-      update: {},
+        expectedAmount: booking.amount,
+        receivedAmount: amount,
+      });
+      return NextResponse.json({ error: "Payment amount does not match the booking." }, { status: 409 });
+    }
+    if (booking.status === "CANCELLED" || booking.status === "FAILED") {
+      console.error("Bachs reported payment for an inactive booking", { bookingId: booking.id, status: booking.status });
+      return NextResponse.json({ error: "Booking is no longer active." }, { status: 409 });
+    }
+
+    const paidAt = typeof event.created_at === "string" && !Number.isNaN(Date.parse(event.created_at))
+      ? new Date(event.created_at)
+      : new Date();
+    const paymentMethodDetails = isRecord(data.payment_method_details) ? data.payment_method_details : null;
+    const channel = typeof paymentMethodDetails?.type === "string" ? paymentMethodDetails.type : "bachs";
+
+    const paidBooking = await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
+      const currentBooking = await transaction.booking.findUnique({ where: { id: booking.id } });
+      if (!currentBooking) throw new Error("Booking disappeared during payment processing");
+      if (currentBooking.status === "CANCELLED" || currentBooking.status === "FAILED") {
+        throw new Error("Booking is no longer active");
+      }
+
+      await transaction.booking.update({
+        where: { id: booking.id },
+        data: {
+          status: currentBooking.status === "PENDING" ? "PAID" : currentBooking.status,
+          paymentMethod: "bachs",
+          amountPaid: amount,
+        },
+      });
+      await transaction.payment.upsert({
+        where: { paystackRef: `bachs:${paymentReference}` },
+        create: {
+          bookingId: booking.id,
+          amount,
+          channel,
+          paystackRef: `bachs:${paymentReference}`,
+          status: "success",
+          paidAt,
+        },
+        update: {},
+      });
+      return transaction.booking.findUnique({
+        where: { id: booking.id },
+        include: { package: true },
+      });
     });
 
+    if (!paidBooking) {
+      console.error("Paid booking could not be loaded after transaction", { bookingId: booking.id });
+      return NextResponse.json({ error: "Payment could not be recorded." }, { status: 500 });
+    }
+
+    if (process.env.RESEND_API_KEY && !paidBooking.emailSent) {
+      const emailClaim = await prisma.booking.updateMany({
+        where: { id: paidBooking.id, emailSent: false },
+        data: { emailSent: true },
+      });
+      if (emailClaim.count > 0) {
+        try {
+          await sendBookingConfirmationEmail(paidBooking);
+        } catch (error) {
+          await prisma.booking.updateMany({
+            where: { id: paidBooking.id, emailSent: true },
+            data: { emailSent: false },
+          });
+          console.error("Bachs booking confirmation email failed:", error);
+          return NextResponse.json({ error: "Booking confirmation could not be sent." }, { status: 500 });
+        }
+      }
+    }
+
     return NextResponse.json({ received: true, paid: true });
-  } catch (e) {
-    console.error("Bachs webhook error:", e);
-    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
+  } catch (error) {
+    console.error("Bachs webhook processing failed:", error);
+    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
   }
 }
