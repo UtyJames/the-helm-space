@@ -28,7 +28,9 @@ function createPrismaClient() {
     } as never).$extends(withAccelerate());
   }
 
-  return new PrismaClient();
+  // Fallback for build-time import without env vars — never query in this state.
+  const pool = new Pool({ connectionString: "postgresql://placeholder:placeholder@localhost:5432/placeholder", ssl: { rejectUnauthorized: false } });
+  return new PrismaClient({ adapter: new PrismaPg(pool) });
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();

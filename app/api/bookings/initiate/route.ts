@@ -8,9 +8,20 @@ function generateRef() {
 }
 
 function getOrigin(req: Request) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (appUrl && !appUrl.includes("localhost")) return appUrl.replace(/\/$/, "");
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-  return host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000");
+  const isLocal = !host || host.includes("localhost") || host.includes("127.0.0.1");
+  if (!isLocal && host) {
+    const proto = req.headers.get("x-forwarded-proto") || "https";
+    return `${proto}://${host}`;
+  }
+  // Bachs requires a publicly accessible URL — never send localhost
+  if (appUrl && appUrl.includes("localhost")) {
+    // In local dev, fall back to deployed domain so Bachs accepts the request
+    return "https://thehelmspace.com";
+  }
+  return (appUrl ?? "https://thehelmspace.com").replace(/\/$/, "");
 }
 
 export async function POST(req: Request) {

@@ -31,9 +31,11 @@ export async function createBachsCheckout(params: {
   const amountStr = Number(params.amount).toFixed(2);
 
   const body: Record<string, unknown> = {
-    // Common Bachs checkout shape — uses product inline via amount
-    amount: amountStr,
-    currency: params.currency ?? "NGN",
+    // Bachs requires exactly ONE pricing source: use "pricing" (inline amount)
+    pricing: {
+      amount: amountStr,
+      currency: params.currency ?? "NGN",
+    },
     reference: params.reference,
     customer: { email: params.email, name: params.customerName },
     success_url: params.successUrl,
@@ -55,9 +57,14 @@ export async function createBachsCheckout(params: {
     body: JSON.stringify(body),
   });
 
-  const json = await res.json().catch(() => ({}));
+  const rawText = await res.text();
+  let json: Record<string, unknown> = {};
+  try { json = JSON.parse(rawText); } catch { json = { raw: rawText }; }
   if (!res.ok) {
-    throw new Error(json?.message || json?.error || `Bachs checkout failed (${res.status})`);
+    const detail = JSON.stringify(json).slice(0, 4000);
+    console.error("Bachs checkout 400 body:", detail, " sent:", JSON.stringify(body).slice(0, 2000));
+    const msg = (json as Record<string, unknown>).message ?? (json as Record<string, unknown>).error ?? (json as Record<string, unknown>).detail ?? `Bachs checkout failed (${res.status})`;
+    throw new Error(typeof msg === "string" ? `${msg} :: ${detail}` : `Bachs checkout failed (${res.status}) :: ${detail}`);
   }
   // Hosted URL variants across Bachs versions: checkout_url, url, hosted_url
   const checkoutUrl: string | undefined =
