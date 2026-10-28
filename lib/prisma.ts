@@ -1,7 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { withAccelerate } from "@prisma/extension-accelerate";
-import { Pool } from "pg";
+// pg is imported lazily only when a real (non-accelerate) connection string is present,
+// to avoid bundling pg-cloudflare in the Cloudflare Workers build.
+let PoolCtor: any;
+function getPool() {
+  if (!PoolCtor) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    PoolCtor = require("pg").Pool;
+  }
+  return PoolCtor;
+}
 
 const globalForPrisma = globalThis as unknown as {
   prisma: any;
@@ -13,7 +22,8 @@ function createPrismaClient() {
   const connectionString = directUrl || databaseUrl || "postgresql://placeholder:placeholder@localhost:5432/placeholder";
 
   if (connectionString && !connectionString.startsWith("prisma://") && !connectionString.startsWith("prisma+postgres://")) {
-    const pool = new Pool({
+    const PoolCtor = getPool();
+    const pool = new PoolCtor({
       connectionString,
       ssl: { rejectUnauthorized: false },
       max: 10,
@@ -29,7 +39,8 @@ function createPrismaClient() {
   }
 
   // Fallback for build-time import without env vars — never query in this state.
-  const pool = new Pool({ connectionString: "postgresql://placeholder:placeholder@localhost:5432/placeholder", ssl: { rejectUnauthorized: false } });
+  const PoolCtor = getPool();
+  const pool = new PoolCtor({ connectionString: "postgresql://placeholder:placeholder@localhost:5432/placeholder", ssl: { rejectUnauthorized: false } });
   return new PrismaClient({ adapter: new PrismaPg(pool) });
 }
 

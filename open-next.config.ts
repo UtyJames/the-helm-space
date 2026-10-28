@@ -1,6 +1,5 @@
-import { defineCloudflareConfig } from "@opennextjs/cloudflare";
-
-export default defineCloudflareConfig({
-  // Cloudflare provides pg-cloudflare at runtime via nodejs_compat; mark it external so esbuild doesn't try to bundle it.
-  external: ["pg-cloudflare", "pg-native"],
-});
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { defineCloudflareConfig } = require("@opennextjs/cloudflare") as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cfg = defineCloudflareConfig({ external: ["pg-cloudflare", "pg-native"] });
+export default cfg;
